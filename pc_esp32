@@ -1,0 +1,58 @@
+#include <WiFi.h>
+
+char* ssid = "xxxx";
+const char* password = "xxxx";
+const char* host = "192.168.1.2";
+const int httpPort = 55555;
+WiFiClient client;
+
+void setup()
+{
+    pinMode(4,OUTPUT);
+  
+    Serial.begin(115200);
+    delay(10);
+
+    // We start by connecting to a WiFi network
+    WiFi.begin(ssid, password);
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(2000);
+        Serial.print(".");
+    }
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+
+    Serial.print("connecting to ");
+    Serial.println(host);
+
+    // Use WiFiClient class to create TCP connections
+    
+    
+    if (!client.connect(host, httpPort)) {
+        Serial.println("connection failed");
+        return;
+    }
+    else{
+         client.print(String("GET ") +
+                      "Host: " + host + "\r\n" +
+                      "Port: " + httpPort + "\r\n\r\n");
+    }
+}
+
+void loop()
+{
+    // Read all the lines of the reply from server and print them to Serial
+    while(client.available()) {
+        String line = client.readString();
+        Serial.print(line);
+        if(line == "H")
+          digitalWrite(4, HIGH);
+        if(line == "L")
+          digitalWrite(4, LOW);  
+    }
+
+}
